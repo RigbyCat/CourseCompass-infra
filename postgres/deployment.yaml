@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+
+kind: StatefulSet
+
+metadata:
+  name: postgres-statefulset
+  # Label for organizing resources
+  labels:
+    app: postgres
+
+spec:
+  # Service name for network identity
+  serviceName: postgres-service
+
+  # Number of pod (1 for database)
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: postgres
+
+  # Pod template
+  template:
+    metadata:
+      # Labels applied to pods
+      labels:
+        app: postgres
+
+    spec:
+      containers:
+        # Container name
+        - name: postgres
+          # Docker img
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                # Get from Secret
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
+
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+
+          # Mount storage
+          volumeMounts:
+            - name: postgres-storage
+              # Where data is stored
+              mountPath: /var/lib/postgresql/data
+
+  # Volume claim templates for StatefulSet
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi

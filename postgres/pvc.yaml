@@ -1,0 +1,16 @@
+apiVersion: v1
+
+kind: PersistentVolumeClaim
+
+metadata:
+  # Name to reference storage
+  name: postgres-pvc
+
+spec:
+  accessModes:
+    # RWO = Single node read/write
+    - ReadWriteOnce
+  resources:
+    # Request 2GB of storage
+    requests:
+      storage: 10Gi

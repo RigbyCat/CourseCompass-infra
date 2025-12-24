@@ -1,0 +1,4 @@
+postgres/secret.yaml
+backend/secret.yaml
+*/secret.yaml
+!*.template
